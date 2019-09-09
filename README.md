@@ -1,0 +1,100 @@
+# bs-localforage
+
+This is a binding for [LocalForage](https://localforage.github.io/localForage/) for BuckleScript and Reason. I built it to use within my app [Coronate](https://github.com/johnridesabike/coronate). It works well for my purposes, but it's definitely in an alpha stage. The API isn't complete, and will probably change unexpectedly.
+
+## Installation
+
+run the command:
+```sh
+npm i @johnridesabike/bs-localforage reason-future
+```
+
+and add these to your `bsDependencies` in `bsconfig.json`:
+```json
+"bs-dependencies": [
+    "reason-future",
+    "@johnridesabike/bs-localforage"
+]
+```
+
+## Documentation
+
+For now, I recommend viewing the files in `src` for the type definitions, which should be self-explanatory. 
+
+Here is some additional information which may help you understand them:
+
+### LocalForageJs
+
+This is a zero-overhead binding to the LocalForage API. It's simple and not very type-safe. It types all of the input and output as `Js.Json.t`.
+
+`createInstance` from LocalForage is bound to `make` in Reason for consistency with other Reason libraries. Its configuration object is created with the `config` function.
+
+One key difference between this and the JavaScript LocalForage is that the JS version exports a default instance. In this Reason version, you have to call `make` to use your own instance first.
+
+LocalForage is great because it's simple, but that simplicity allows for lots of unsafe code. To address that, we have `Map` and `Record`:
+
+### Map
+
+This component uses LocalForage in a "mapping" fashion idiomatic to Reason. Its purpose is storing a series of objects, for example, chess player profiles.
+
+To create an instance for it, you have to call `Map.make`. It takes a `config` object and a module which matches this signature:
+
+```re
+module type Data = {
+  type t;
+  let decode: Js.Json.t => t;
+  let encode: t => Js.Json.t;
+};
+```
+
+Any time you use a `Map` function on an instance, it will use the `encode` and `decode` functions to convert the JSON to your type. If you want to store the raw Reason data (which is usually fine) you can just use an `%identity` function to cast the type.
+
+`Map` uses [Future](https://github.com/RationalJS/future) to handle promises, and it returns data in a `Belt.Map.String` data container.
+
+### Record
+
+This component treats a LocalForage store like a Reason record. Its purpose is storing data with a set number of fields, such as a configuration file.
+
+To create an instance for it, you have to call `Record.make`. It takes a `config` object and a module which maches this signature:
+
+```re
+module type Data = {
+  type t;
+  let default: t;
+  let decode: Js.Json.t => t;
+  let encode: t => Js.Json.t;
+};
+```
+
+The `default` value is returned any time the module fails to decode data taken from LocalForage.
+
+### GetItemsJs, RemoveItemsJs, SetItemsJs, & LoadAllPlugins
+
+These are bindings to LocalForage plugins of the same names. Each one has a `load` function which must be called before using them. For convenience (and so `load` doesn't get called more than necessary) `LoadAllPlugins.re` will load them all if it's included in your project. `Map` and `Record` both include it automatically.
+
+## Example code
+
+[See Coronate's `Db` module](https://github.com/johnridesabike/coronate/blob/master/src/Db.re)
+
+## Development info
+
+Q: "Why does this do *a* instead of *b*?"
+A: Probably because that's what I'm using in the Coronate app, so it made sense to be consistent here. Likewise, I haven't implemented features that aren't relevant to my project yet. 
+
+If you think bs-localforage can be improved, I'm happy to recieve your issues or pull requests. Feel free to fork this code and develop your own vesion, too!
+
+## Development commands
+
+### Build
+```
+npm run build
+```
+
+### Watch
+
+```
+npm run watch
+```
+
+### Editor
+If you use `vscode`, Press `Windows + Shift + B` it will build automatically
