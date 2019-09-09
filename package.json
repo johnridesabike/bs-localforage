@@ -1,6 +1,6 @@
 {
   "name": "@johnridesabike/bs-localforage",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "BuckleScript bindings for LocalForage",
   "scripts": {
     "clean": "bsb -clean-world",
