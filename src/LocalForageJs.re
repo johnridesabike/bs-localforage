@@ -16,11 +16,10 @@ type config = {
 [@bs.module "localforage"] external indexedDb: driver = "INDEXEDDB";
 [@bs.module "localforage"] external webSql: driver = "WEBSQL";
 [@bs.module "localforage"] external localStorage: driver = "LOCALSTORAGE";
-[@bs.module "localforage"] 
-external make: config => t = "createInstance";
+[@bs.module "localforage"] external make: config => t = "createInstance";
 
 [@bs.module "localforage"]
-external clear: unit => unit = "clear";
+external clear: unit => Js.Promise.t(unit) = "clear";
 
 /** Data API */
 [@bs.send]
