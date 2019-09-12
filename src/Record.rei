@@ -1,4 +1,3 @@
-let errorHandler: 'a => Js.String.t;
 type t('a);
 type config = LocalForageJs.config;
 module type Data = {
@@ -8,5 +7,5 @@ module type Data = {
   let encode: t => Js.Json.t;
 };
 let make: (config, (module Data with type t = 'a)) => t('a);
-let get: t('a) => Future.t(Belt.Result.t('a, Js.String.t));
-let set: (t('a), ~items: 'a) => Future.t(Belt.Result.t(unit, Js.String.t));
+let get: t('a) => Js.Promise.t('a);
+let set: (t('a), ~items: 'a) => Js.Promise.t(unit);

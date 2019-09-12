@@ -1,10 +1,5 @@
-open Belt.Result;
 module LF = LocalForageJs;
 include LoadAllPlugins;
-let errorHandler = error => {
-  Js.Console.error(error);
-  Js.String.make(error);
-};
 type t('a) = {
   store: LocalForageJs.t,
   default: 'a,
@@ -29,16 +24,14 @@ let make = (config, type t, data: (module Data with type t = t)) => {
 };
 let get = ({store, decode, default}) =>
   GetItemsJs.allJson(store)
-  ->FutureJs.fromPromise(errorHandler)
-  ->Future.flatMapOk(items =>
-      switch (decode(items)) {
-      | exception x =>
-        Js.Console.error(x);
-        Future.value(Ok(default));
-      | x => Future.value(Ok(x))
-      }
-    );
+  |> Js.Promise.then_(items =>
+       switch (decode(items)) {
+       | exception x =>
+         Js.Console.error(x);
+         Js.Promise.resolve(default);
+       | x => Js.Promise.resolve(x)
+       }
+     );
 let set = ({store, encode}, ~items) => {
-  SetItemsJs.fromJson(store, encode(items))
-  ->FutureJs.fromPromise(errorHandler);
+  SetItemsJs.fromJson(store, encode(items));
 };

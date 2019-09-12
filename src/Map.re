@@ -1,12 +1,6 @@
-open Belt.Result;
 module M = Belt.Map.String;
 module LF = LocalForageJs;
 include LoadAllPlugins;
-
-let errorHandler = error => {
-  Js.Console.error(error);
-  Js.String.make(error);
-};
 
 type t('a) = {
   store: LocalForageJs.t,
@@ -25,67 +19,57 @@ let make = (config, type t, data: (module Data with type t = t)) => {
 };
 let getItem = ({store, decode}, ~key) => {
   LF.getItem(store, key)
-  ->FutureJs.fromPromise(errorHandler)
-  ->Future.flatMapOk(value =>
-      switch (value->Js.Nullable.toOption->Belt.Option.map(decode)) {
-      | Some(value) => Future.value(Ok(Some(value)))
-      | None => Future.value(Ok(None))
-      | exception error =>
-        Js.Console.error(error);
-        Future.value(Error(Js.String.make(error)));
-      }
-    );
+  |> Js.Promise.then_(value =>
+       switch (value->Js.Nullable.toOption->Belt.Option.map(decode)) {
+       | Some(value) => Js.Promise.resolve(Some(value))
+       | None => Js.Promise.resolve(None)
+       | exception error =>
+         Js.Console.error(error);
+         Js.Promise.reject(error);
+       }
+     );
 };
 let setItem = ({store, encode}, ~key, ~v) =>
   LF.setItem(store, key, encode(v));
-let getKeys = ({store}) =>
-  LF.keys(store)->FutureJs.fromPromise(Js.Console.error);
-let _parseItems = (decode, items) =>
+let getKeys = ({store}) => LF.keys(store);
+let parseItems = (decode, items) =>
   items->Js.Dict.entries->M.fromArray->M.map(decode);
 let getItems = ({store, decode}, ~keys) =>
   GetItemsJs.dictFromArray(store, keys)
-  ->FutureJs.fromPromise(errorHandler)
-  ->Future.flatMapOk(items =>
-      switch (_parseItems(decode, items)) {
-      | exception error =>
-        Js.Console.error(error);
-        Future.value(Error(Js.String.make(error)));
-      | result => Future.value(Ok(result))
-      }
-    );
+  |> Js.Promise.then_(items =>
+       switch (parseItems(decode, items)) {
+       | exception error =>
+         Js.Console.error(error);
+         Js.Promise.reject(error);
+       | result => Js.Promise.resolve(result)
+       }
+     );
 let getAllItems = ({store, decode}) =>
   GetItemsJs.allDict(store)
-  ->FutureJs.fromPromise(errorHandler)
-  ->Future.flatMapOk(items =>
-      switch (_parseItems(decode, items)) {
-      | exception error =>
-        Js.Console.error(error);
-        Future.value(Error(Js.String.make(error)));
-      | result => Future.value(Ok(result))
-      }
-    );
+  |> Js.Promise.then_(items =>
+       switch (parseItems(decode, items)) {
+       | exception error =>
+         Js.Console.error(error);
+         Js.Promise.reject(error);
+       | result => Js.Promise.resolve(result)
+       }
+     );
 let setItems = ({store, encode}, ~items) => {
   switch (M.map(items, encode)) {
   | result =>
-    result
-    ->M.toArray
-    ->Js.Dict.fromArray
-    ->SetItemsJs.fromDict(store, _)
-    ->FutureJs.fromPromise(errorHandler)
+    result |> M.toArray |> Js.Dict.fromArray |> SetItemsJs.fromDict(store)
   | exception error =>
     Js.Console.error(error);
-    Future.value(Error(Js.String.make(error)));
+    Js.Promise.reject(error);
   };
 };
 let removeItems = ({store}, ~items) =>
-  RemoveItemsJs.fromArray(store, items)
-  ->FutureJs.fromPromise(errorHandler);
+  RemoveItemsJs.fromArray(store, items);
 let iterate = ({store, decode}, ~f) => {
   LF.iterate(store, (. value, key, iterationNumber) =>
     switch (decode(value)) {
     | result => f(. result, key, iterationNumber)
     | exception error => Js.Console.error(error)
     }
-  )
-  ->FutureJs.fromPromise(errorHandler);
+  );
 };

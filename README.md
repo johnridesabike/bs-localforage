@@ -6,13 +6,12 @@ This is a binding for [LocalForage](https://localforage.github.io/localForage/) 
 
 run the command:
 ```sh
-npm i @johnridesabike/bs-localforage reason-future
+npm i @johnridesabike/bs-localforage
 ```
 
 and add these to your `bsDependencies` in `bsconfig.json`:
 ```json
 "bs-dependencies": [
-    "reason-future",
     "@johnridesabike/bs-localforage"
 ]
 ```
@@ -75,6 +74,10 @@ These are bindings to LocalForage plugins of the same names. Each one has a `loa
 ## Example code
 
 [See Coronate's `Db` module](https://github.com/johnridesabike/coronate/blob/master/src/Db.re)
+
+## Changelog
+
+**2019-09-12:** Removed the reason-future dependency. It now only returns JS promises.
 
 ## Development info
 
