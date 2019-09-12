@@ -48,7 +48,7 @@ module type Data = {
 
 Any time you use a `Map` function on an instance, it will use the `encode` and `decode` functions to convert the JSON to your type. If you want to store the raw Reason data (which is usually fine) you can just use an `%identity` function to cast the type.
 
-`Map` uses [Future](https://github.com/RationalJS/future) to handle promises, and it returns data in a `Belt.Map.String` data container.
+`Map` returns data in a `Belt.Map.String` data container.
 
 ### Record
 
