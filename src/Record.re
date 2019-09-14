@@ -26,10 +26,11 @@ let get = ({store, decode, default}) =>
   GetItemsJs.allJson(store)
   |> Js.Promise.then_(items =>
        switch (decode(items)) {
-       | exception x =>
-         Js.Console.error(x);
+       | exception error =>
+         Js.Console.error(error);
+         Js.Console.warn("Failed to decode database. Using default record.");
          Js.Promise.resolve(default);
-       | x => Js.Promise.resolve(x)
+       | result => Js.Promise.resolve(result)
        }
      );
 let set = ({store, encode}, ~items) => {
