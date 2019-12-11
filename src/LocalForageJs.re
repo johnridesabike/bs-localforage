@@ -1,23 +1,24 @@
 type t;
 type driver;
 module Config = {
+  /* LocalForage's config object has optional properties, but they must be
+     completely excluded if not used. A config like `{driver: undefined}` will
+     produce runtime errors. Because of this, we have to rely on @bs.deriving
+     abstract, which will not complile ommitted fields at all.*/
+  [@bs.deriving abstract]
   type t = {
-    driver: option(array(driver)),
+    [@bs.optional]
+    driver: array(driver),
     name: string,
-    size: option(int),
+    [@bs.optional]
+    size: int,
     storeName: string,
-    version: option(float),
-    description: option(string),
+    [@bs.optional]
+    version: float,
+    [@bs.optional]
+    description: string,
   };
-  let make =
-      (~driver=?, ~name, ~size=?, ~storeName, ~version=?, ~description=?, ()) => {
-    driver,
-    name,
-    size,
-    storeName,
-    version,
-    description,
-  };
+  let make = t;
 };
 [@bs.module "localforage"] external indexedDb: driver = "INDEXEDDB";
 [@bs.module "localforage"] external webSql: driver = "WEBSQL";
