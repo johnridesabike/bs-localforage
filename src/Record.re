@@ -6,7 +6,7 @@ type t('a) = {
   encode: 'a => Js.Json.t,
   decode: Js.Json.t => 'a,
 };
-type config = LocalForageJs.config;
+type config = LocalForageJs.Config.t;
 module type Data = {
   type t;
   let default: t;

@@ -12,7 +12,8 @@
   "suffix": ".bs.js",
   "bs-dependencies": [],
   "warnings": {
-    "error": "+101"
+    "number": "+A-48-9",
+    "error": "+A-3-44-102"
   },
   "refmt": 3
 }

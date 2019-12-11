@@ -77,6 +77,8 @@ These are bindings to LocalForage plugins of the same names. Each one has a `loa
 
 ## Changelog
 
+**2019-12-11:** Updated to BuckleScript 7 and reorganized some of the functions.
+
 **2019-09-12:** Removed the reason-future dependency. It now only returns JS promises.
 
 ## Development info
