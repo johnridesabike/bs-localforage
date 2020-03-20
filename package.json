@@ -1,6 +1,6 @@
 {
   "name": "@johnridesabike/bs-localforage",
-  "version": "1.0.0-alpha.7",
+  "version": "1.0.0-alpha.8",
   "description": "BuckleScript bindings for LocalForage",
   "scripts": {
     "clean": "bsb -clean-world",
@@ -24,10 +24,10 @@
     "url": "https://github.com/johnridesabike/bs-localforage.git"
   },
   "devDependencies": {
-    "bs-platform": "^7.0.1"
+    "bs-platform": "^7.2.2"
   },
   "peerDependencies": {
-    "bs-platform": "^7.0.1"
+    "bs-platform": "^7.2.2"
   },
   "dependencies": {
     "localforage": "^1.7.3",

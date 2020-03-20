@@ -1,28 +1,9 @@
 type t;
-type driver;
-module Config = {
-  /* LocalForage's config object has optional properties, but they must be
-     completely excluded if not used. A config like `{driver: undefined}` will
-     produce runtime errors. Because of this, we have to rely on @bs.deriving
-     abstract, which will not complile ommitted fields at all.*/
-  [@bs.deriving abstract]
-  type t = {
-    [@bs.optional]
-    driver: array(driver),
-    name: string,
-    [@bs.optional]
-    size: int,
-    storeName: string,
-    [@bs.optional]
-    version: float,
-    [@bs.optional]
-    description: string,
-  };
-  let make = t;
-};
-[@bs.module "localforage"] external indexedDb: driver = "INDEXEDDB";
-[@bs.module "localforage"] external webSql: driver = "WEBSQL";
-[@bs.module "localforage"] external localStorage: driver = "LOCALSTORAGE";
+
+[@bs.module "localforage"] external indexedDb: Config.driver = "INDEXEDDB";
+[@bs.module "localforage"] external webSql: Config.driver = "WEBSQL";
+[@bs.module "localforage"]
+external localStorage: Config.driver = "LOCALSTORAGE";
 [@bs.module "localforage"] external make: Config.t => t = "createInstance";
 
 [@bs.module "localforage"]
@@ -41,13 +22,14 @@ external removeItem: (t, string) => Js.Promise.t(unit) = "removeItem";
 [@bs.send] external keys: t => Js.Promise.t(array(string)) = "keys";
 [@bs.send]
 external iterate:
-  (t, (. Js.Json.t, string, int) => unit) => Js.Promise.t(unit) =
+  (t, [@bs.uncurry] ((Js.Json.t, string, int) => unit)) => Js.Promise.t(unit) =
   "iterate";
 
 /** Settings API */
 [@bs.send]
-external setDriver: (t, driver) => unit = "setDriver";
-[@bs.send] external setDriverMany: (t, array(driver)) => unit = "setDriver";
+external setDriver: (t, Config.driver) => unit = "setDriver";
+[@bs.send]
+external setDriverMany: (t, array(Config.driver)) => unit = "setDriver";
 
 /* `config` is mainly used for setting configs, but can also be used for
    getting info */

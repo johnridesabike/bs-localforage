@@ -4,7 +4,7 @@ type t = LocalForageJs.t;
 [@bs.module "localforage-setitems"]
 external extendPrototype: t => unit = "extendPrototype";
 let load = () => extendPrototype(localForage);
-[@bs.deriving abstract]
+
 type item = {
   key: string,
   value: Js.Json.t,
