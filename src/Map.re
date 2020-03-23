@@ -1,5 +1,6 @@
 module M = Belt.Map.String;
 module LF = LocalForageJs;
+module P = Js.Promise;
 include LoadAllPlugins;
 
 type t('a) = {
@@ -29,10 +30,11 @@ let make = (config, type t, data: (module Data with type t = t)) => {
 
 let getItem = ({store, decode, _}, ~key) => {
   LF.getItem(store, key)
-  |> Js.Promise.then_(value =>
+  |> P.then_(value =>
        switch (value->Js.Nullable.toOption->Belt.Option.mapU(decode)) {
-       | Some(value) => Js.Promise.resolve(Some(value))
-       | None => Js.Promise.resolve(None)
+       | exception error => P.reject(error)
+       | Some(value) => P.resolve(Some(value))
+       | None => P.resolve(None)
        }
      );
 };
@@ -47,14 +49,20 @@ let parseItems = (decode, items) =>
 
 let getItems = ({store, decode, _}, ~keys) =>
   GetItemsJs.dictFromArray(store, keys)
-  |> Js.Promise.then_(items =>
-       parseItems(decode, items) |> Js.Promise.resolve
+  |> P.then_(items =>
+       switch (parseItems(decode, items)) {
+       | exception error => P.reject(error)
+       | items => P.resolve(items)
+       }
      );
 
 let getAllItems = ({store, decode, _}) =>
   GetItemsJs.allDict(store)
-  |> Js.Promise.then_(items =>
-       parseItems(decode, items) |> Js.Promise.resolve
+  |> P.then_(items =>
+       switch (parseItems(decode, items)) {
+       | exception error => P.reject(error)
+       | items => P.resolve(items)
+       }
      );
 
 let setItems = ({store, encode, _}, ~items) => {

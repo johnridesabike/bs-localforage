@@ -1,4 +1,5 @@
 module LF = LocalForageJs;
+module P = Js.Promise;
 include LoadAllPlugins;
 
 type t('a) = {
@@ -28,7 +29,12 @@ let make = (config, type t, data: (module Data with type t = t)) => {
 
 let get = ({store, decode, _}) =>
   GetItemsJs.allJson(store)
-  |> Js.Promise.then_(items => decode(. items) |> Js.Promise.resolve);
+  |> P.then_(items =>
+       switch (decode(. items)) {
+       | exception error => P.reject(error)
+       | items => P.resolve(items)
+       }
+     );
 
 let set = ({store, encode, _}, ~items) => {
   SetItemsJs.fromJson(store, encode(. items));
