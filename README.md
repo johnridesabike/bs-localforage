@@ -64,7 +64,8 @@ Any time you use a `Map` function on an instance, it will use the `encode` and
 raw Reason data (which is usually fine) you can just use an `%identity` function
 to cast the type.
 
-`Map` returns data in a `Belt.Map.String` data container.
+`Map` returns data in an `array((string, 'value))` to be easily imported into
+your map container of choice.
 
 ### Record
 
@@ -95,6 +96,10 @@ automatically.
 [See Coronate's `Db` module](https://github.com/johnridesabike/coronate/blob/master/src/Db.re)
 
 ## Changelog
+
+### 2020-3-28
+- `Map` no longer returns a `Belt.Map`. It now returns `array((key, value))`
+  for better compatibility across libraries.
 
 ### 2020-3-20
 - Improved performanced.

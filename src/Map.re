@@ -1,6 +1,7 @@
-module M = Belt.Map.String;
+module D = Js.Dict;
 module LF = LocalForageJs;
 module P = Js.Promise;
+module A = Js.Array;
 include LoadAllPlugins;
 
 type t('a) = {
@@ -33,8 +34,7 @@ let getItem = ({store, decode, _}, ~key) => {
   |> P.then_(value =>
        switch (value->Js.Nullable.toOption->Belt.Option.mapU(decode)) {
        | exception error => P.reject(error)
-       | Some(value) => P.resolve(Some(value))
-       | None => P.resolve(None)
+       | value => P.resolve(value)
        }
      );
 };
@@ -44,8 +44,10 @@ let setItem = ({store, encode, _}, ~key, ~v) =>
 
 let getKeys = ({store, _}) => LF.keys(store);
 
+let mapValues = ((key, value), ~f) => (key, f(. value));
+
 let parseItems = (decode, items) =>
-  items->Js.Dict.entries->M.fromArray->M.mapU(decode);
+  items |> D.entries |> A.map(mapValues(~f=decode));
 
 let getItems = ({store, decode, _}, ~keys) =>
   GetItemsJs.dictFromArray(store, keys)
@@ -66,9 +68,9 @@ let getAllItems = ({store, decode, _}) =>
      );
 
 let setItems = ({store, encode, _}, ~items) => {
-  items->M.mapU(encode)
-  |> M.toArray
-  |> Js.Dict.fromArray
+  items
+  |> A.map(mapValues(~f=encode))
+  |> D.fromArray
   |> SetItemsJs.fromDict(store);
 };
 
