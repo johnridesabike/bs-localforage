@@ -2,28 +2,16 @@ module LF = LocalForageJs;
 module P = Js.Promise;
 include LoadAllPlugins;
 
-type t('a) = {
+type t('a, 'identity) = {
   store: LocalForageJs.t,
   encode: (. 'a) => Js.Json.t,
   decode: (. Js.Json.t) => 'a,
 };
 
-module type Data = {
-  type t;
-  let decode: Js.Json.t => t;
-  let encode: t => Js.Json.t;
-};
-
-let make = (config, type t, data: (module Data with type t = t)) => {
+let make = (config, type t, type id, data: Id.encodable(t, id)) => {
   module Data = (val data);
-  let encode = {
-    let encode = Data.encode;
-    (. x) => encode(x);
-  };
-  let decode = {
-    let decode = Data.decode;
-    (. x) => decode(x);
-  };
+  let encode = Id.encode(Data.encode);
+  let decode = Id.decode(Data.decode);
   {store: LF.make(config), encode, decode};
 };
 

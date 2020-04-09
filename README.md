@@ -43,26 +43,29 @@ version exports a default instance. In this Reason version, you have to call
 LocalForage is great because it's simple, but that simplicity allows for lots
 of unsafe code. To address that, we have `Map` and `Record`:
 
+### Id
+
+Before creating a `Map` or a `Record`, you need to encode your data with the
+`Id.MakeEncodable` functor:
+
+```reason
+module MyEncodable = LocalForage.Id.MakeEncodable({
+  type t = string;
+  let encode = Js.Json.string;
+  let decode = Js.Json.decodeString;
+};
+```
+
 ### Map
 
 This component uses LocalForage in a "mapping" fashion idiomatic to Reason. Its 
 purpose is storing a series of objects, for example, chess player profiles.
 
 To create an instance for it, you have to call `Map.make`. It takes a `config`
-object and a module which matches this signature:
-
-```re
-module type Data = {
-  type t;
-  let decode: Js.Json.t => t;
-  let encode: t => Js.Json.t;
-};
-```
+object and an encode module created by `Id.MakeEncodable`.
 
 Any time you use a `Map` function on an instance, it will use the `encode` and 
-`decode` functions to convert the JSON to your type. If you want to store the
-raw Reason data (which is usually fine) you can just use an `%identity` function
-to cast the type.
+`decode` functions to convert the JSON to your type. 
 
 `Map` returns data in an `array((string, 'value))` to be easily imported into
 your map container of choice.
@@ -73,15 +76,7 @@ This component treats a LocalForage store like a Reason record. Its purpose is
 storing data with a set number of fields, such as a configuration file.
 
 To create an instance for it, you have to call `Record.make`. It takes a
-`config` object and a module which maches this signature:
-
-```re
-module type Data = {
-  type t;
-  let decode: Js.Json.t => t;
-  let encode: t => Js.Json.t;
-};
-```
+`config` object and an encode module created by `Id.MakeEncodable`.
 
 ### GetItemsJs, RemoveItemsJs, SetItemsJs, & LoadAllPlugins
 
@@ -96,6 +91,10 @@ automatically.
 [See Coronate's `Db` module](https://github.com/johnridesabike/coronate/blob/master/src/Db.re)
 
 ## Changelog
+
+### 2020-04-09
+- Added `Id` module.
+- `Map` and `Record` now require a module created by `Id.MakeEncodable`.
 
 ### 2020-3-28
 - `Map` no longer returns a `Belt.Map`. It now returns `array((key, value))`
